@@ -2,12 +2,17 @@ package AnEditor
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Structure
+import java.lang.foreign.MemorySegment.copy
 import kotlin.system.exitProcess
 
 class AnEditor {
-    fun enableRaw() {
+    private fun ctrl(key: Int): Int{
+        return key and 0x1f
+    }
+    fun enableRaw(): AnEditor.LibC.Termios {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
+        val ogTermios = LibC.of(termios)
         if (rc != 0) {
             exitProcess(1)
         }
@@ -18,11 +23,48 @@ class AnEditor {
         termios.c_cc[LibC.Constants.VTIME] = 1
 
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, termios)
+        return ogTermios
     }
-    fun disableRaw() {
-        val termios = LibC.Termios()
-        LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, termios)
+    fun disableRaw(ogTermios: LibC.Termios) {
+        LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, ogTermios)
     }
+    private fun readKey() : Int {
+        val key = System.`in`.read()
+        return key
+    }
+
+    private fun processKey() : Int {
+        val c = readKey()
+
+        when (c) {
+            ctrl(c)->return -1
+        }
+        println(c.toChar())
+        return 0
+    }
+    fun refreshScreen(){
+        System.out.write("\u001b[2J".toByteArray())
+        System.out.write("\u001b[H".toByteArray())
+        drawRows()
+        System.out.write("\u001b[H".toByteArray())
+    }
+    fun runEditor(){
+        val ogTermios = enableRaw()
+        var status = 0
+        while(status != -1){
+            refreshScreen()
+            status = processKey()
+        }
+        disableRaw(ogTermios)
+    }
+
+    fun drawRows(){
+        for(ys in 0..24){
+            System.out.write("\u001b[$ys;1H".toByteArray())
+            System.out.write("$ys\n".toByteArray())
+        }
+    }
+
     interface LibC : Library {
         object Constants {
             const val SYSTEM_OUT_FD = 0
