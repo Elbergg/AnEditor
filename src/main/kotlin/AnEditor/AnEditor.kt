@@ -2,17 +2,19 @@ package AnEditor
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Structure
-import java.lang.foreign.MemorySegment.copy
 import kotlin.system.exitProcess
 
 class AnEditor {
+    var ogTermios = LibC.Termios()
+    var cols = 0
+    var rows = 0
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
-    fun enableRaw(): AnEditor.LibC.Termios {
+    fun enableRaw() {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
-        val ogTermios = LibC.of(termios)
+        ogTermios =  LibC.of(termios)
         if (rc != 0) {
             exitProcess(1)
         }
@@ -23,9 +25,8 @@ class AnEditor {
         termios.c_cc[LibC.Constants.VTIME] = 1
 
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, termios)
-        return ogTermios
     }
-    fun disableRaw(ogTermios: LibC.Termios) {
+    fun disableRaw() {
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, ogTermios)
     }
     private fun readKey() : Int {
@@ -44,22 +45,31 @@ class AnEditor {
     }
     fun refreshScreen(){
         System.out.write("\u001b[2J".toByteArray())
-        System.out.write("\u001b[H".toByteArray())
         drawRows()
         System.out.write("\u001b[H".toByteArray())
     }
     fun runEditor(){
-        val ogTermios = enableRaw()
+        enableRaw()
+        getWindowSize()
         var status = 0
         while(status != -1){
             refreshScreen()
             status = processKey()
         }
-        disableRaw(ogTermios)
+        disableRaw()
     }
-
+    fun getWindowSize(): Int{
+        var winsize = LibC.Winsize()
+        if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
+            return -1
+        }else{
+            cols = winsize.ws_col.toInt()
+            rows = winsize.ws_row.toInt()
+            return 0
+        }
+    }
     fun drawRows(){
-        for(ys in 0..24){
+        for(ys in 1..rows){
             System.out.write("\u001b[$ys;1H".toByteArray())
             System.out.write("$ys\n".toByteArray())
         }
@@ -103,7 +113,12 @@ class AnEditor {
                 return copy
             }
         }
-
+        @Structure.FieldOrder("ws_row", "ws_col")
+        class Winsize : Structure() {
+            @JvmField var ws_row: Short = 0
+            @JvmField var ws_col: Short = 0
+        }
+        fun ioctl(fd: Int, op: Int, winsize: Winsize): Int
         fun tcgetattr(fd: Int, termios: Termios): Int
         fun tcsetattr(fd: Int, optional_actions: Int, termios: Termios): Int
     }
