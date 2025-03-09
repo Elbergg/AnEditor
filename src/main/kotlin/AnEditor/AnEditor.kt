@@ -79,9 +79,13 @@ class AnEditor {
         return 0
     }
     fun refreshScreen(){
-        System.out.write("\u001b[2J".toByteArray())
-        drawRows()
+        var buf = ""
+        System.out.write("\u001B[?25l".toByteArray())
         System.out.write("\u001b[H".toByteArray())
+        buf = drawRows(buf)
+        buf = buf.plus("\u001B[H")
+        System.out.write(buf.toByteArray())
+        System.out.write("\u001B[?25h".toByteArray())
     }
     fun runEditor(){
         enableRaw()
@@ -105,18 +109,21 @@ class AnEditor {
             return 0
         }
     }
-    fun drawRows(){
+    fun drawRows(buf: String) : String{
+        getWindowSize()
+        var temp = buf
         for(ys in 1..rows){
-            System.out.write("\u001b[$ys;1H".toByteArray())
-            if(ys < rows - 1)
-                System.out.write("$ys\n".toByteArray())
+            temp = temp.plus("$ys")
+            temp = temp.plus("\u001B[K")
+            if(ys < rows)
+                 temp = temp.plus("\r\n")
         }
+        return temp
     }
 
     interface LibC : Library {
         object Constants {
             const val SYSTEM_OUT_FD = 0
-            const val SYSTEM_IN_FD = 0
             const val ISIG = 1
             const val ICANON = 2
             const val ECHO = 10
