@@ -2,6 +2,7 @@ package AnEditor
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Structure
+import sun.font.TrueTypeFont
 import kotlin.system.exitProcess
 
 class AnEditor {
@@ -60,7 +61,9 @@ class AnEditor {
     }
     fun getWindowSize(): Int{
         var winsize = LibC.Winsize()
-        if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
+        if(true || LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
+            System.out.write("\u001B[999C\u001B[999B".toByteArray())
+            readKey()
             return -1
         }else{
             cols = winsize.ws_col.toInt()
