@@ -12,6 +12,9 @@ class AnEditor {
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
+//    private fun isctrl(key: Int): Boolean{
+//        return key and 0xf1 shr 1
+//    }
     fun enableRaw() {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
@@ -27,6 +30,14 @@ class AnEditor {
 
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, termios)
     }
+    fun die(msg: String) {
+        System.out.write("\u001B[2J".toByteArray())
+        System.out.write("\u001B[H".toByteArray())
+        System.out.flush()
+        println(msg)
+        disableRaw()
+        exitProcess(1)
+    }
     fun disableRaw() {
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, ogTermios)
     }
@@ -39,9 +50,32 @@ class AnEditor {
         val c = readKey()
 
         when (c) {
-            ctrl(c)->return -1
+            ctrl(81)->return 1
         }
         println(c.toChar())
+        return 0
+    }
+
+
+    fun getCursorPos() : Int{
+        var buf = ByteArray(32)
+        var i: Int = 0
+        System.out.write("\u001B[6n".toByteArray())
+        while (i < buf.size - 1){
+            if(System.`in`.read(buf, i, 1) == -1)
+                break
+            if(buf[i].toInt().toChar() =='R') break
+            i++
+        }
+        buf[i] = 0
+        val str = buf.decodeToString().substring(2)
+        val regex = """(\d+);(\d+)""".toRegex()
+        val matchResult = regex.find(str)
+        if (matchResult == null) return -1
+        val (rowsStr, colsStr) = matchResult.destructured
+        rows = rowsStr.toIntOrNull() ?: return -1
+        cols = colsStr.toIntOrNull() ?: return -1
+        readKey()
         return 0
     }
     fun refreshScreen(){
@@ -53,18 +87,18 @@ class AnEditor {
         enableRaw()
         getWindowSize()
         var status = 0
-        while(status != -1){
+        while(status != 1){
             refreshScreen()
             status = processKey()
         }
+        die("AnEditor exit")
         disableRaw()
     }
     fun getWindowSize(): Int{
         var winsize = LibC.Winsize()
-        if(true || LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
+        if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
             System.out.write("\u001B[999C\u001B[999B".toByteArray())
-            readKey()
-            return -1
+            return getCursorPos()
         }else{
             cols = winsize.ws_col.toInt()
             rows = winsize.ws_row.toInt()
@@ -74,14 +108,15 @@ class AnEditor {
     fun drawRows(){
         for(ys in 1..rows){
             System.out.write("\u001b[$ys;1H".toByteArray())
-            System.out.write("$ys\n".toByteArray())
+            if(ys < rows - 1)
+                System.out.write("$ys\n".toByteArray())
         }
     }
 
     interface LibC : Library {
         object Constants {
             const val SYSTEM_OUT_FD = 0
-
+            const val SYSTEM_IN_FD = 0
             const val ISIG = 1
             const val ICANON = 2
             const val ECHO = 10
