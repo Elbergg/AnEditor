@@ -9,6 +9,8 @@ class AnEditor {
     var ogTermios = LibC.Termios()
     var cols = 0
     var rows = 0
+    var coursor_x = 10
+    var coursor_y = 10
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
@@ -43,6 +45,15 @@ class AnEditor {
     }
     private fun readKey() : Int {
         val key = System.`in`.read()
+        if (key == 27)
+        {
+            var seq  = ByteArray(3)
+            System.`in`.read(seq)
+            if(seq[0].toInt() !=0 && seq[1].toInt() != 1)
+            {
+                if(seq[0].toInt().toChar() =='[')
+            }
+        }
         return key
     }
 
@@ -52,7 +63,6 @@ class AnEditor {
         when (c) {
             ctrl(81)->return 1
         }
-        println(c.toChar())
         return 0
     }
 
@@ -62,6 +72,15 @@ class AnEditor {
         print("Welcome to AnEditor! Press any key to start")
         System.out.write("\u001B[H".toByteArray())
         readKey()
+    }
+
+    fun editorMoveCoursor(key: Char){
+        when (key){
+            's'->coursor_y--
+            'w'->coursor_y++
+            'a'->coursor_x--
+            'd'->coursor_x++
+        }
     }
 
     fun getCursorPos() : Int{
@@ -90,7 +109,7 @@ class AnEditor {
         System.out.write("\u001B[?25l".toByteArray())
         System.out.write("\u001b[H".toByteArray())
         buf = drawRows(buf)
-        buf = buf.plus("\u001B[H")
+        buf = buf.plus("\u001B[${coursor_y};${coursor_x}H")
         System.out.write(buf.toByteArray())
         System.out.write("\u001B[?25h".toByteArray())
     }
