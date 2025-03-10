@@ -3,6 +3,7 @@ import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Structure
 import sun.font.TrueTypeFont
+import sun.security.krb5.internal.ktab.KeyTabInputStream
 import kotlin.system.exitProcess
 
 class AnEditor {
@@ -14,9 +15,9 @@ class AnEditor {
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
-//    private fun isctrl(key: Int): Boolean{
-//        return key and 0xf1 shr 1
-//    }
+    enum class KEYS(val key: Int){
+        ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
+    }
     fun enableRaw() {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
@@ -51,17 +52,50 @@ class AnEditor {
             System.`in`.read(seq)
             if(seq[0].toInt() !=0 && seq[1].toInt() != 1)
             {
-                if(seq[0].toInt().toChar() =='[')
+                if(seq[0].toInt().toChar() =='['){
+                    if (seq[1].toInt().toChar() >= '0' && seq[1].toInt().toChar() <= '9')
+                    {
+                        if(seq[2].toInt().toChar() == '~'){
+                            when(seq[1].toInt().toChar()){
+                                '1'->return KEYS.HOME_KEY.key
+                                '3'->return KEYS.DEL_KEY.key
+                                '4'->return KEYS.END_KEY.key
+                                '5'->return KEYS.PAGE_UP.key
+                                '6'->return KEYS.PAGE_DOWN.key
+                                '7'->return KEYS.HOME_KEY.key
+                                '8'->return KEYS.END_KEY.key
+                            }
+                        }
+                    }
+                    when(seq[1].toInt().toChar()){
+                        'A'->return KEYS.ARROW_UP.key
+                        'B'->return KEYS.ARROW_DOWN.key
+                        'C'->return KEYS.ARROW_RIGHT.key
+                        'D'->return KEYS.ARROW_LEFT.key
+                        'H'->return KEYS.HOME_KEY.key
+                        'F'->return KEYS.END_KEY.key
+                    }
+                }
             }
         }
         return key
     }
-
     private fun processKey() : Int {
         val c = readKey()
-
         when (c) {
             ctrl(81)->return 1
+            KEYS.ARROW_UP.key ->moveCoursor(KEYS.ARROW_UP.key)
+            KEYS.ARROW_DOWN.key ->moveCoursor(KEYS.ARROW_DOWN.key)
+            KEYS.ARROW_LEFT.key ->moveCoursor(KEYS.ARROW_LEFT.key)
+            KEYS.ARROW_RIGHT.key ->moveCoursor(KEYS.ARROW_RIGHT.key)
+            KEYS.PAGE_UP.key, KEYS.PAGE_DOWN.key ->{
+                var max = rows - 1
+                while(max-- != 0){
+                    moveCoursor(if (c == KEYS.PAGE_UP.key) KEYS.ARROW_UP.key else KEYS.ARROW_DOWN.key)
+                }
+            }
+            KEYS.HOME_KEY.key->coursor_x = 1
+            KEYS.END_KEY.key->coursor_x = cols-1
         }
         return 0
     }
@@ -74,12 +108,24 @@ class AnEditor {
         readKey()
     }
 
-    fun editorMoveCoursor(key: Char){
+    fun moveCoursor(key: Int){
         when (key){
-            's'->coursor_y--
-            'w'->coursor_y++
-            'a'->coursor_x--
-            'd'->coursor_x++
+            KEYS.ARROW_DOWN.key->{
+                if(coursor_y!=rows-1)
+                    coursor_y++
+            }
+            KEYS.ARROW_UP.key->{
+                if(coursor_y!=1)
+                coursor_y--
+            }
+            KEYS.ARROW_LEFT.key->{
+                if(coursor_x!=1)
+                    coursor_x--
+            }
+            KEYS.ARROW_RIGHT.key->{
+                if(coursor_x!=cols-1)
+                    coursor_x++
+            }
         }
     }
 
@@ -131,8 +177,8 @@ class AnEditor {
             System.out.write("\u001B[999C\u001B[999B".toByteArray())
             return getCursorPos()
         }else{
-            cols = winsize.ws_col.toInt()
-            rows = winsize.ws_row.toInt()
+            cols = winsize.ws_col.toInt() - 1
+            rows = winsize.ws_row.toInt() - 1
             return 0
         }
     }
