@@ -56,6 +56,13 @@ class AnEditor {
         return 0
     }
 
+    private fun welcomeMessage(){
+        refreshScreen()
+        System.out.write("\u001B[${rows/5};${cols*3/5}H".toByteArray())
+        print("Welcome to AnEditor! Press any key to start")
+        System.out.write("\u001B[H".toByteArray())
+        readKey()
+    }
 
     fun getCursorPos() : Int{
         var buf = ByteArray(32)
@@ -91,11 +98,12 @@ class AnEditor {
         enableRaw()
         getWindowSize()
         var status = 0
+        welcomeMessage()
         while(status != 1){
             refreshScreen()
             status = processKey()
         }
-        die("AnEditor exit")
+        die("AnEditor exit\r")
         disableRaw()
     }
     fun getWindowSize(): Int{
