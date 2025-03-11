@@ -51,7 +51,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
             KEYS.ARROW_LEFT.key ->moveCoursor(KEYS.ARROW_LEFT.key)
             KEYS.ARROW_RIGHT.key ->moveCoursor(KEYS.ARROW_RIGHT.key)
             KEYS.PAGE_UP.key, KEYS.PAGE_DOWN.key ->{
-                var max = editor.rows - 1
+                var max = editor.rows
                 while(max-- != 0){
                     moveCoursor(if (c == KEYS.PAGE_UP.key) KEYS.ARROW_UP.key else KEYS.ARROW_DOWN.key)
                 }
@@ -64,15 +64,15 @@ class EditorKeyProcceser(val editor: AnEditor) {
     fun moveCoursor(key: Int){
         when (key){
             KEYS.ARROW_DOWN.key->{
-                if(editor.coursor_y!=editor.rows-1)
+                if(editor.coursor_y<editor.num_rows)
                     editor.coursor_y++
             }
             KEYS.ARROW_UP.key->{
-                if(editor.coursor_y!=1)
+                if(editor.coursor_y!=0)
                     editor.coursor_y--
             }
             KEYS.ARROW_LEFT.key->{
-                if(editor.coursor_x!=1)
+                if(editor.coursor_x!=0)
                     editor.coursor_x--
             }
             KEYS.ARROW_RIGHT.key->{

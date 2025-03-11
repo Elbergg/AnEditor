@@ -9,12 +9,14 @@ class AnEditor() {
     var ogTermios = LibC.Termios()
     var cols = 0
     var rows = 0
-    var coursor_x = 10
-    var coursor_y = 10
-    var curr_row = ""
+    var coursor_x = 3
+    var coursor_y = 3
+    var in_rows: List<String> = emptyList()
     var num_rows = 0
     val writer = EditorWriter(this)
     val procceser = EditorKeyProcceser(this)
+    val io = EditorIO(this)
+    var rowOffset = 0
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }
@@ -45,9 +47,6 @@ class AnEditor() {
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, ogTermios)
     }
 
-
-
-
     fun getCursorPos() : Int{
         var buf = ByteArray(32)
         var i: Int = 0
@@ -69,17 +68,19 @@ class AnEditor() {
         procceser.readKey()
         return 0
     }
-
-
     fun runEditor(args: Array<String>){
         enableRaw()
         getWindowSize()
         var status = 0
-        writer.welcomeMessage()
+        writer.refreshScreen()
         if(args.size >= 1) {
-            writer.open(args[0])
+            io.open(args[0])
+        }
+        else{
+            writer.welcomeMessage()
         }
         while(status != 1){
+            getWindowSize()
             writer.refreshScreen()
             status = procceser.processKey()
         }
@@ -147,7 +148,3 @@ class AnEditor() {
     }
 }
 
-class Row {
-    var size = 0
-    var content = ""
-}
