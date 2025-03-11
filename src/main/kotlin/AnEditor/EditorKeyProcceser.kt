@@ -62,6 +62,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
         return 0
     }
     fun moveCoursor(key: Int){
+        var row = if (editor.coursor_y >= editor.num_rows) null else editor.in_rows[editor.coursor_y]
         when (key){
             KEYS.ARROW_DOWN.key->{
                 if(editor.coursor_y<editor.num_rows)
@@ -72,13 +73,26 @@ class EditorKeyProcceser(val editor: AnEditor) {
                     editor.coursor_y--
             }
             KEYS.ARROW_LEFT.key->{
-                if(editor.coursor_x> 0)
+                if(editor.coursor_x!= 0) {
                     editor.coursor_x--
+                }else if(editor.coursor_y > 0){
+                    editor.coursor_y--;
+                    editor.coursor_x=editor.in_rows[editor.coursor_y].length+1
+                }
             }
-            KEYS.ARROW_RIGHT.key->{
-                if(editor.coursor_x!=editor.cols-1)
-                    editor.coursor_x++
+            KEYS.ARROW_RIGHT.key-> {
+                    if(row != null && editor.coursor_x < row.length + 1) {
+                        editor.coursor_x++
+                    }else if (row != null && editor.coursor_x == row.length+1){
+                        editor.coursor_y++
+                        editor.coursor_x = 0
+                    }
             }
+        }
+        row = if(editor.coursor_y >= editor.num_rows) null else editor.in_rows[editor.coursor_y]
+        var rowlen = row?.length ?: 0
+        if(editor.coursor_x > rowlen +1){
+            editor.coursor_x = rowlen + 1
         }
     }
 }

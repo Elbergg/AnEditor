@@ -5,20 +5,21 @@ import com.sun.jna.Structure
 import java.io.File
 import kotlin.system.exitProcess
 
-class AnEditor() {
+class AnEditor {
     var ogTermios = LibC.Termios()
     var cols = 0
     var rows = 0
     var coursor_x = 0
     var coursor_y = 0
     var in_rows: List<String> = emptyList()
+    var renders: List<String> = emptyList()
     var num_rows = 0
     val writer = EditorWriter(this)
     val procceser = EditorKeyProcceser(this)
     val io = EditorIO(this)
     var rowOffset = 0
     var lineNumOffset = 0
-    var co
+    var colOffset = 0
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }
@@ -51,7 +52,7 @@ class AnEditor() {
 
     fun getCursorPos() : Int{
         var buf = ByteArray(32)
-        var i: Int = 0
+        var i = 0
         System.out.write("\u001B[6n".toByteArray())
         while (i < buf.size - 1){
             if(System.`in`.read(buf, i, 1) == -1)
