@@ -72,7 +72,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
                     editor.coursor_y--
             }
             KEYS.ARROW_LEFT.key->{
-                if(editor.coursor_x!=0)
+                if(editor.coursor_x> 0)
                     editor.coursor_x--
             }
             KEYS.ARROW_RIGHT.key->{

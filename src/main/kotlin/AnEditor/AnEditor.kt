@@ -9,14 +9,16 @@ class AnEditor() {
     var ogTermios = LibC.Termios()
     var cols = 0
     var rows = 0
-    var coursor_x = 3
-    var coursor_y = 3
+    var coursor_x = 0
+    var coursor_y = 0
     var in_rows: List<String> = emptyList()
     var num_rows = 0
     val writer = EditorWriter(this)
     val procceser = EditorKeyProcceser(this)
     val io = EditorIO(this)
     var rowOffset = 0
+    var lineNumOffset = 0
+    var co
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }

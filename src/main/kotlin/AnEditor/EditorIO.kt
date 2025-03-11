@@ -9,6 +9,7 @@ class EditorIO (val editor: AnEditor) {
             val lines = File(fileName).readLines()
             editor.num_rows = lines.size
             editor.in_rows = lines
+            editor.lineNumOffset = lines.size.toString().length
         }catch(e: FileNotFoundException){
             editor.die("File not found")
         }catch(e: IOException){

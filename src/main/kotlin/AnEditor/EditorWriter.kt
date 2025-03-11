@@ -14,8 +14,10 @@ class EditorWriter(var editor: AnEditor) {
             }
             else{
                 var len = editor.in_rows[fileRow].length
-                if(len > editor.cols)
-                    len = editor.cols
+                if(len > editor.cols - editor.lineNumOffset - 2)
+                    len = editor.cols - editor.lineNumOffset - 2
+                temp = temp.plus("${fileRow+1}")
+                temp = temp.plus(" ".repeat(editor.lineNumOffset+1))
                 temp = temp.plus(editor.in_rows[fileRow].substring(0, len))
                 temp = temp.plus("\u001B[K")
             }
@@ -38,7 +40,7 @@ class EditorWriter(var editor: AnEditor) {
         System.out.write("\u001B[?25l".toByteArray())
         System.out.write("\u001b[H".toByteArray())
         buf = drawRows(buf)
-        buf = buf.plus("\u001B[${editor.coursor_y-editor.rowOffset+1};${editor.coursor_x+1}H")
+        buf = buf.plus("\u001B[${editor.coursor_y-editor.rowOffset+1};${editor.coursor_x + editor.lineNumOffset+3}H")
         System.out.write(buf.toByteArray())
         System.out.write("\u001B[?25h".toByteArray())
     }
