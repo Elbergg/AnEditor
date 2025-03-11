@@ -2,9 +2,9 @@ import AnEditor.AnEditor
 
 import kotlin.system.exitProcess
 
-fun main() {
+fun main(args: Array<String>) {
     val editor = AnEditor()
-    editor.runEditor()
+    editor.runEditor(args)
 }
 
 
