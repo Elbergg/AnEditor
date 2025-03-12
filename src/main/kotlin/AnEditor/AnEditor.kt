@@ -20,6 +20,7 @@ class AnEditor {
     var rowOffset = 0
     var lineNumOffset = 0
     var colOffset = 0
+    var render_x = 0
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }
