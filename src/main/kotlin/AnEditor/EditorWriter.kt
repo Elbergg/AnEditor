@@ -5,6 +5,30 @@ enum class RENDER_CONSTANTS(val value: Int){
 }
 
 class EditorWriter(var editor: AnEditor) {
+    fun drawStatusBar(buf: String): String{
+        var temp = buf
+        temp = temp.plus("\u001B[7m")
+        var len = editor.fileName.length
+        temp = temp.plus(editor.fileName)
+        temp = temp.plus(" ")
+        len++
+        if(len < editor.cols) {
+            temp = temp.plus(editor.coursor_y.toString())
+            temp = temp.plus(";")
+            len += editor.cols.toString().length + 1
+        }
+        if(len < editor.cols) {
+            temp = temp.plus(editor.coursor_x.toString())
+            len += editor.rows.toString().length
+        }
+        while(len < editor.cols){
+            temp = temp.plus(" ")
+            len++
+        }
+        temp = temp.plus(" ${editor.render_x}")
+        temp = temp.plus("\u001B[m")
+        return temp
+    }
     fun drawRows(buf: String) : String{
         var temp = buf
         for(ys in 0..editor.rows-1) {
@@ -15,7 +39,7 @@ class EditorWriter(var editor: AnEditor) {
 
             }
             else{
-                var len = editor.renders[fileRow].length - editor.colOffset
+                var len = editor.in_rows[fileRow].length - editor.colOffset
                 if(len > editor.cols - editor.lineNumOffset - 2)
                     len = editor.cols - editor.lineNumOffset - 2
                 temp = temp.plus("${fileRow+1}")
@@ -24,8 +48,7 @@ class EditorWriter(var editor: AnEditor) {
                     temp = temp.plus(editor.renders[fileRow].substring(editor.colOffset, len+editor.colOffset))
                 temp = temp.plus("\u001B[K")
             }
-            if (ys < editor.rows)
-                temp = temp.plus("\r\n")
+            temp = temp.plus("\r\n")
         }
         return temp
     }
@@ -68,6 +91,7 @@ class EditorWriter(var editor: AnEditor) {
         System.out.write("\u001B[?25l".toByteArray())
         System.out.write("\u001b[H".toByteArray())
         buf = drawRows(buf)
+        buf = drawStatusBar(buf)
         buf = buf.plus("\u001B[${editor.coursor_y-editor.rowOffset+1};${editor.render_x - editor.colOffset + editor.lineNumOffset+3}H")
         System.out.write(buf.toByteArray())
         System.out.write("\u001B[?25h".toByteArray())

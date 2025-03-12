@@ -51,13 +51,23 @@ class EditorKeyProcceser(val editor: AnEditor) {
             KEYS.ARROW_LEFT.key ->moveCoursor(KEYS.ARROW_LEFT.key)
             KEYS.ARROW_RIGHT.key ->moveCoursor(KEYS.ARROW_RIGHT.key)
             KEYS.PAGE_UP.key, KEYS.PAGE_DOWN.key ->{
+                if(c == KEYS.PAGE_UP.key){
+                    editor.coursor_y = editor.rowOffset
+                }else if(c == KEYS.PAGE_DOWN.key){
+                    editor.coursor_y =  editor.rowOffset + editor.rows - 1
+                    if(editor.coursor_y > editor.num_rows)
+                        editor.coursor_y = editor.num_rows
+                }
                 var max = editor.rows
-                while(max-- != 0){
+                while(max-- > 0){
                     moveCoursor(if (c == KEYS.PAGE_UP.key) KEYS.ARROW_UP.key else KEYS.ARROW_DOWN.key)
                 }
             }
-            KEYS.HOME_KEY.key->editor.coursor_x = 1
-            KEYS.END_KEY.key->editor.coursor_x = editor.cols-1
+            KEYS.HOME_KEY.key->editor.coursor_x = 0
+            KEYS.END_KEY.key->{
+                if(editor.coursor_y < editor.num_rows)
+                    editor.coursor_x = editor.in_rows[editor.coursor_y].length
+            }
         }
         return 0
     }
@@ -81,9 +91,9 @@ class EditorKeyProcceser(val editor: AnEditor) {
                 }
             }
             KEYS.ARROW_RIGHT.key-> {
-                    if(row != null && editor.coursor_x < row.length + 1) {
+                    if(row != null && editor.coursor_x < row.length) {
                         editor.coursor_x++
-                    }else if (row != null && editor.coursor_x == row.length+1){
+                    }else if (row != null && editor.coursor_x == row.length){
                         editor.coursor_y++
                         editor.coursor_x = 0
                     }

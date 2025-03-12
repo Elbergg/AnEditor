@@ -21,6 +21,7 @@ class AnEditor {
     var lineNumOffset = 0
     var colOffset = 0
     var render_x = 0
+    var fileName = ""
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }
@@ -79,6 +80,7 @@ class AnEditor {
         writer.refreshScreen()
         if(args.size >= 1) {
             io.open(args[0])
+            fileName = args[0]
         }
         else{
             writer.welcomeMessage()
@@ -95,10 +97,12 @@ class AnEditor {
         var winsize = LibC.Winsize()
         if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
             System.out.write("\u001B[999C\u001B[999B".toByteArray())
+            rows -= 1
             return getCursorPos()
         }else{
             cols = winsize.ws_col.toInt() - 1
             rows = winsize.ws_row.toInt() - 1
+            rows -= 1
             return 0
         }
     }
