@@ -2,7 +2,6 @@ package AnEditor
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Structure
-import java.io.File
 import kotlin.system.exitProcess
 
 class AnEditor {
@@ -11,17 +10,20 @@ class AnEditor {
     var rows = 0
     var coursor_x = 0
     var coursor_y = 0
-    var in_rows: List<String> = emptyList()
-    var renders: List<String> = emptyList()
+    var in_rows: MutableList<String> = mutableListOf()
+    var renders: MutableList<String> = mutableListOf()
     var num_rows = 0
-    val writer = EditorWriter(this)
+    val gui = EditorGUI(this)
     val procceser = EditorKeyProcceser(this)
     val io = EditorIO(this)
+    val writer = EditorWriter(this)
     var rowOffset = 0
     var lineNumOffset = 0
     var colOffset = 0
     var render_x = 0
     var fileName = ""
+    var statusMsg = ""
+    var statusMsg_time = 0
     enum class KEYS(val key: Int){
         ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
     }
@@ -77,17 +79,18 @@ class AnEditor {
         enableRaw()
         getWindowSize()
         var status = 0
-        writer.refreshScreen()
+        gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit"))
+        gui.refreshScreen()
         if(args.size >= 1) {
             io.open(args[0])
             fileName = args[0]
         }
         else{
-            writer.welcomeMessage()
+            gui.welcomeMessage()
         }
         while(status != 1){
             getWindowSize()
-            writer.refreshScreen()
+            gui.refreshScreen()
             status = procceser.processKey()
         }
         die("AnEditor exit\r")
@@ -97,12 +100,12 @@ class AnEditor {
         var winsize = LibC.Winsize()
         if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
             System.out.write("\u001B[999C\u001B[999B".toByteArray())
-            rows -= 1
+            rows -= 2
             return getCursorPos()
         }else{
             cols = winsize.ws_col.toInt() - 1
             rows = winsize.ws_row.toInt() - 1
-            rows -= 1
+            rows -= 2
             return 0
         }
     }

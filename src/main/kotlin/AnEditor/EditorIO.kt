@@ -9,7 +9,8 @@ class EditorIO (val editor: AnEditor) {
         try {
             val lines = File(fileName).readLines()
             editor.num_rows = lines.size
-            editor.in_rows = lines
+            editor.in_rows = lines.toMutableList()
+            editor.renders = lines.toMutableList()
             updateRows()
             editor.lineNumOffset = lines.size.toString().length
         }catch(e: FileNotFoundException){
@@ -18,23 +19,27 @@ class EditorIO (val editor: AnEditor) {
             editor.die("IOError")
         }
     }
-    fun updateRow(row: String): String {
+    fun updateRow(row_idx: Int) {
         var render = ""
-        for(i in 0..row.length-1){
-            if(row[i] == '\t'){
-                while (i%8 != 0){
+        var idx = 0
+        for(i in 0..<editor.in_rows[row_idx].length){
+            if(editor.in_rows[row_idx][i] == '\t'){
+                render+= ' '
+                idx++
+                while (idx%8 != 0){
                     render += ' '
+                    idx++
                 }
             } else {
-                render += row[i]
+                render += editor.in_rows[row_idx][i]
+                idx++
             }
-
         }
-        return render
+        editor.renders[row_idx] = render
     }
     fun updateRows(){
         for(i in 0..editor.in_rows.size-1){
-            editor.renders = editor.renders.plus(updateRow(editor.in_rows[i]))
+            updateRow(i)
         }
     }
 }

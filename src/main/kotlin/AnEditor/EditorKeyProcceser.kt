@@ -68,6 +68,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
                 if(editor.coursor_y < editor.num_rows)
                     editor.coursor_x = editor.in_rows[editor.coursor_y].length
             }
+            else -> editor.writer.insertChar(c.toChar())
         }
         return 0
     }
@@ -86,8 +87,8 @@ class EditorKeyProcceser(val editor: AnEditor) {
                 if(editor.coursor_x!= 0) {
                     editor.coursor_x--
                 }else if(editor.coursor_y > 0){
-                    editor.coursor_y--;
-                    editor.coursor_x=editor.in_rows[editor.coursor_y].length+1
+                    editor.coursor_y--
+                    editor.coursor_x=editor.in_rows[editor.coursor_y].length
                 }
             }
             KEYS.ARROW_RIGHT.key-> {
@@ -101,8 +102,8 @@ class EditorKeyProcceser(val editor: AnEditor) {
         }
         row = if(editor.coursor_y >= editor.num_rows) null else editor.in_rows[editor.coursor_y]
         var rowlen = row?.length ?: 0
-        if(editor.coursor_x > rowlen +1){
-            editor.coursor_x = rowlen + 1
+        if(editor.coursor_x > rowlen){
+            editor.coursor_x = rowlen
         }
     }
 }
