@@ -42,4 +42,26 @@ class EditorIO (val editor: AnEditor) {
             updateRow(i)
         }
     }
+    fun rowsToString(): String{
+        var buf = ""
+        for(row in editor.in_rows){
+            buf += row
+            buf += '\n'
+        }
+        return buf
+    }
+    fun save(): Int{
+        if(editor.fileName == "")
+            return -1
+        val buf = rowsToString()
+        val file = File(editor.fileName)
+        try{file.writeText(buf)}catch(e:IOException){
+            editor.gui.setStatusMessage(arrayOf("Error saving file"))
+            return -1
+        }
+        editor.gui.setStatusMessage(arrayOf("File saved succesfully"))
+        editor.notSaved = false
+        return 0
+    }
+
 }

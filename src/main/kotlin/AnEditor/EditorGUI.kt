@@ -12,6 +12,11 @@ class EditorGUI(var editor: AnEditor) {
         temp = temp.plus(editor.fileName)
         temp = temp.plus(" ")
         len++
+        var mod = "Modified: ${editor.notSaved}"
+        temp = temp.plus(mod)
+        len+= mod.length
+        temp = temp.plus(" ")
+        len++
         if(len < editor.cols) {
             temp = temp.plus(editor.coursor_y.toString())
             temp = temp.plus(";")
@@ -21,9 +26,6 @@ class EditorGUI(var editor: AnEditor) {
             temp = temp.plus(editor.coursor_x.toString())
             len += editor.rows.toString().length
         }
-        try {
-            temp = temp.plus("${editor.renders[editor.coursor_y]}")
-        }catch(e: Exception){}
         while(len < editor.cols){
         temp = temp.plus(" ")
         len++

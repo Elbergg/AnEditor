@@ -1,7 +1,12 @@
 package AnEditor
 
-import AnEditor.AnEditor.KEYS
 
+enum class KEYS(val key: Int){
+    ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002),
+    ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001),
+    HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004),
+    BACKSPACE(127)
+}
 class EditorKeyProcceser(val editor: AnEditor) {
     private fun ctrl(key: Int): Int{
         return key and 0x1f
@@ -45,7 +50,24 @@ class EditorKeyProcceser(val editor: AnEditor) {
     fun processKey() : Int {
         val c = readKey()
         when (c) {
-            ctrl(81)->return 1
+            '\r'.code -> {}
+            ctrl(81)->{
+                if(editor.notSaved) {
+                    editor.gui.setStatusMessage(arrayOf("The file has unsaved changes, are you sure you want to quit? [y]"))
+                    editor.gui.refreshScreen()
+                    var status = readKey()
+                    if(status == 'y'.code){
+                        return 1
+                    }
+                    else{
+                        editor.gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit | Ctrl-S = save"))
+                        return 0
+                    }
+                }
+                else{
+                    return 1
+                }
+            }
             KEYS.ARROW_UP.key ->moveCoursor(KEYS.ARROW_UP.key)
             KEYS.ARROW_DOWN.key ->moveCoursor(KEYS.ARROW_DOWN.key)
             KEYS.ARROW_LEFT.key ->moveCoursor(KEYS.ARROW_LEFT.key)
@@ -68,6 +90,10 @@ class EditorKeyProcceser(val editor: AnEditor) {
                 if(editor.coursor_y < editor.num_rows)
                     editor.coursor_x = editor.in_rows[editor.coursor_y].length
             }
+            ctrl('s'.code)->editor.io.save()
+            ctrl('h'.code), KEYS.BACKSPACE.key, KEYS.DEL_KEY.key->{editor.writer.delChar()}
+            ctrl('l'.code)->{}
+            ''.code->{}
             else -> editor.writer.insertChar(c.toChar())
         }
         return 0

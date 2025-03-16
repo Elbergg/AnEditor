@@ -24,9 +24,7 @@ class AnEditor {
     var fileName = ""
     var statusMsg = ""
     var statusMsg_time = 0
-    enum class KEYS(val key: Int){
-        ARROW_LEFT(5000), ARROW_RIGHT(5001), ARROW_UP(5002), ARROW_DOWN(5003), PAGE_UP(2000), PAGE_DOWN(2001), HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004)
-    }
+    var notSaved = false
     fun enableRaw() {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
@@ -79,7 +77,7 @@ class AnEditor {
         enableRaw()
         getWindowSize()
         var status = 0
-        gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit"))
+        gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit | Ctrl-S = save"))
         gui.refreshScreen()
         if(args.size >= 1) {
             io.open(args[0])
