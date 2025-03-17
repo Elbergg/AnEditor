@@ -84,6 +84,7 @@ class AnEditor {
             fileName = args[0]
         }
         else{
+            io.initEmpty()
             gui.welcomeMessage()
         }
         while(status != 1){

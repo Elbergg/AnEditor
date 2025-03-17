@@ -36,7 +36,11 @@ class EditorGUI(var editor: AnEditor) {
     }
 
     fun setStatusMessage(args: Array<String>){
-        editor.statusMsg = args[0]
+        editor.statusMsg = ""
+        for(arg in args) {
+            editor.statusMsg += arg
+            editor.statusMsg += " "
+        }
     }
 
     fun drawMessageBar(buf: String): String{
@@ -102,7 +106,33 @@ class EditorGUI(var editor: AnEditor) {
         return rx
     }
 
+    fun prompt(prompt: String): String{
+        var buf = ""
+        while(true){
+            setStatusMessage(arrayOf(prompt, buf))
+            refreshScreen()
+            val c = editor.procceser.readKey()
+            if(c == KEYS.BACKSPACE.key){
+                if (buf.length >= 1){
+                    buf = buf.substring(0, buf.length-1)
+                }
+            }
+            else if(c.toChar() == ''){
+                buf = ""
+                return buf
+            }
+            else if(c.toChar() == '\r'){
+                setStatusMessage(arrayOf(""))
+                return buf
+            }
+            else if(!c.toChar().isISOControl() && c < 128){
+                buf += c.toChar()
+            }
+        }
+    }
+
     fun refreshScreen(){
+        editor.lineNumOffset = editor.num_rows.toString().length
         scroll()
         var buf = ""
         System.out.write("\u001B[?25l".toByteArray())

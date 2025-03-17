@@ -19,6 +19,13 @@ class EditorIO (val editor: AnEditor) {
             editor.die("IOError")
         }
     }
+    fun initEmpty(){
+        editor.num_rows = 1
+        editor.in_rows = arrayOf("").toMutableList()
+        editor.renders = arrayOf("").toMutableList()
+        editor.lineNumOffset = editor.rows.toString().length
+
+    }
     fun updateRow(row_idx: Int) {
         var render = ""
         var idx = 0
@@ -51,8 +58,13 @@ class EditorIO (val editor: AnEditor) {
         return buf
     }
     fun save(): Int{
-        if(editor.fileName == "")
-            return -1
+        if(editor.fileName == "") {
+            editor.fileName = editor.gui.prompt("Save as: ").trim()
+            if(editor.fileName == "") {
+                editor.gui.setStatusMessage(arrayOf("File not saved"))
+                return 0
+            }
+        }
         val buf = rowsToString()
         val file = File(editor.fileName)
         try{file.writeText(buf)}catch(e:IOException){
@@ -61,6 +73,7 @@ class EditorIO (val editor: AnEditor) {
         }
         editor.gui.setStatusMessage(arrayOf("File saved succesfully"))
         editor.notSaved = false
+        editor.gui.refreshScreen()
         return 0
     }
 
