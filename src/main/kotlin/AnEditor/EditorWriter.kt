@@ -5,30 +5,29 @@ class EditorWriter(val editor: AnEditor) {
         val builder = StringBuilder(editor.in_rows[idx])
         builder.insert(at, c.toString())
         editor.in_rows[idx] = builder.toString()
-        editor.io.updateRow(idx)
+        editor.rowmng.updateRow(idx)
         editor.notSaved = true
     }
-
     fun insertChar(c: Char){
-        if(editor.coursor_y == editor.num_rows){
+        if(editor.cursor_y == editor.num_rows){
             insertRow(editor.num_rows, "")
             editor.rows++
         }
-        rowInsertChar(editor.coursor_y, editor.coursor_x, c)
-        editor.coursor_x++
+        rowInsertChar(editor.cursor_y, editor.cursor_x, c)
+        editor.cursor_x++
         editor.notSaved = true
     }
     fun rowDelChar(row_idx: Int, at: Int){
         val builder = StringBuilder(editor.in_rows[row_idx])
         builder.deleteCharAt(at)
         editor.in_rows[row_idx] = builder.toString()
-        editor.io.updateRow(row_idx)
+        editor.rowmng.updateRow(row_idx)
         editor.notSaved = true
     }
     fun delChar(){
-        if(editor.coursor_y == editor.num_rows || editor.coursor_x == editor.in_rows[editor.coursor_y].length){return}
-        if(editor.coursor_x >= 0){
-            rowDelChar(editor.coursor_y, editor.coursor_x)
+        if(editor.cursor_y == editor.num_rows || editor.cursor_x == editor.in_rows[editor.cursor_y].length){return}
+        if(editor.cursor_x >= 0){
+            rowDelChar(editor.cursor_y, editor.cursor_x)
         }
     }
     fun insertRow(at: Int, buf: String){
@@ -36,26 +35,26 @@ class EditorWriter(val editor: AnEditor) {
         editor.num_rows++
     }
     fun insertNewLine(){
-        if(editor.coursor_x == 0){
-            insertRow(editor.coursor_y, "")
+        if(editor.cursor_x == 0){
+            insertRow(editor.cursor_y, "")
         }
         else{
-            val temp1 = editor.in_rows[editor.coursor_y].substring(0, editor.coursor_x)
-            val temp2 = editor.in_rows[editor.coursor_y].substring(editor.coursor_x, editor.in_rows[editor.coursor_y].length)
-            editor.in_rows[editor.coursor_y] = temp1
-            insertRow(editor.coursor_y+1, temp2)
+            val temp1 = editor.in_rows[editor.cursor_y].substring(0, editor.cursor_x)
+            val temp2 = editor.in_rows[editor.cursor_y].substring(editor.cursor_x, editor.in_rows[editor.cursor_y].length)
+            editor.in_rows[editor.cursor_y] = temp1
+            insertRow(editor.cursor_y+1, temp2)
         }
         editor.renders.add("")
-        editor.io.updateRows()
-        editor.coursor_x = 0
-        editor.coursor_y++
+        editor.rowmng.updateRows()
+        editor.cursor_x = 0
+        editor.cursor_y++
         editor.notSaved = true
     }
     fun bckspcChar(){
-        if(editor.coursor_y == editor.num_rows){return}
-        if(editor.coursor_x > 0){
-            rowDelChar(editor.coursor_y, editor.coursor_x-1)
-            editor.coursor_x--
+        if(editor.cursor_y == editor.num_rows){return}
+        if(editor.cursor_x > 0){
+            rowDelChar(editor.cursor_y, editor.cursor_x-1)
+            editor.cursor_x--
         }
     }
 }

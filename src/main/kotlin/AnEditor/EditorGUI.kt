@@ -5,7 +5,7 @@ enum class RENDER_CONSTANTS(val value: Int){
 }
 
 class EditorGUI(var editor: AnEditor) {
-    fun drawStatusBar(buf: String): String{
+    private fun drawStatusBar(buf: String): String{
         var temp = buf
         temp = temp.plus("\u001B[7m")
         var len = editor.fileName.length
@@ -18,12 +18,12 @@ class EditorGUI(var editor: AnEditor) {
         temp = temp.plus(" ")
         len++
         if(len < editor.cols) {
-            temp = temp.plus(editor.coursor_y.toString())
+            temp = temp.plus(editor.cursor_y.toString())
             temp = temp.plus(";")
             len += editor.cols.toString().length + 1
         }
         if(len < editor.cols) {
-            temp = temp.plus(editor.coursor_x.toString())
+            temp = temp.plus(editor.cursor_x.toString())
             len += editor.rows.toString().length
         }
         while(len < editor.cols){
@@ -39,7 +39,7 @@ class EditorGUI(var editor: AnEditor) {
         editor.statusMsg = args[0]
     }
 
-    fun drawMessageBar(buf: String): String{
+    private fun drawMessageBar(buf: String): String{
         var temp = buf
         temp += ("\u001B[K")
         var msglen = editor.statusMsg.length
@@ -48,7 +48,7 @@ class EditorGUI(var editor: AnEditor) {
         temp += editor.statusMsg.substring(0,msglen)
         return temp
     }
-    fun drawRows(buf: String) : String{
+    private fun drawRows(buf: String) : String{
         var temp = buf
         for(ys in 0..editor.rows-1) {
             var fileRow = ys + editor.rowOffset
@@ -72,34 +72,23 @@ class EditorGUI(var editor: AnEditor) {
         return temp
     }
 
-    fun scroll(){
+    private fun scroll(){
         editor.render_x = 0
-        if (editor.coursor_y < editor.num_rows){
-            editor.render_x = editorRowCxToRx(editor.coursor_y, editor.coursor_x)
+        if (editor.cursor_y < editor.num_rows){
+            editor.render_x = editor.cursor.CxToRx(editor.cursor_y, editor.cursor_x)
         }
-        if(editor.coursor_y < editor.rowOffset){
-            editor.rowOffset = editor.coursor_y
+        if(editor.cursor_y < editor.rowOffset){
+            editor.rowOffset = editor.cursor_y
         }
-        if(editor.coursor_y >= editor.rowOffset + editor.rows){
-            editor.rowOffset = editor.coursor_y - editor.rows + 1
+        if(editor.cursor_y >= editor.rowOffset + editor.rows){
+            editor.rowOffset = editor.cursor_y - editor.rows + 1
         }
-        if(editor.coursor_x < editor.colOffset){
+        if(editor.cursor_x < editor.colOffset){
             editor.colOffset = editor.render_x
         }
-        if(editor.coursor_x >= editor.colOffset + (editor.cols-editor.lineNumOffset-1)){
+        if(editor.cursor_x >= editor.colOffset + (editor.cols-editor.lineNumOffset-1)){
             editor.colOffset = editor.render_x - (editor.cols-editor.lineNumOffset-1) + 1
         }
-    }
-
-    fun editorRowCxToRx(row_idx: Int,cx: Int ): Int
-    {
-        var rx = 0
-        for(j in 0..<cx){
-            if (editor.in_rows[row_idx][j] == '\t')
-                rx += (RENDER_CONSTANTS.TAB_STOP.value - 1) - (rx % RENDER_CONSTANTS.TAB_STOP.value)
-            rx++
-        }
-        return rx
     }
 
     fun refreshScreen(){
@@ -110,7 +99,7 @@ class EditorGUI(var editor: AnEditor) {
         buf = drawRows(buf)
         buf = drawStatusBar(buf)
         buf = drawMessageBar(buf)
-        buf = buf.plus("\u001B[${editor.coursor_y-editor.rowOffset+1};${editor.render_x - editor.colOffset + editor.lineNumOffset+2}H")
+        buf = buf.plus("\u001B[${editor.cursor_y-editor.rowOffset+1};${editor.render_x - editor.colOffset + editor.lineNumOffset+2}H")
         System.out.write(buf.toByteArray())
         System.out.write("\u001B[?25h".toByteArray())
     }
