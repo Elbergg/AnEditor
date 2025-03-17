@@ -1,7 +1,7 @@
 package AnEditor
 
-class EditorWriter(val editor: AnEditor) {
-    fun rowInsertChar(idx: Int, at: Int, c: Char){
+class EditorWriter(private val editor: AnEditor) {
+    private fun rowInsertChar(idx: Int, at: Int, c: Char){
         val builder = StringBuilder(editor.in_rows[idx])
         builder.insert(at, c.toString())
         editor.in_rows[idx] = builder.toString()
@@ -17,7 +17,7 @@ class EditorWriter(val editor: AnEditor) {
         editor.cursor_x++
         editor.notSaved = true
     }
-    fun rowDelChar(row_idx: Int, at: Int){
+    private fun rowDelChar(row_idx: Int, at: Int){
         val builder = StringBuilder(editor.in_rows[row_idx])
         builder.deleteCharAt(at)
         editor.in_rows[row_idx] = builder.toString()
@@ -30,7 +30,7 @@ class EditorWriter(val editor: AnEditor) {
             rowDelChar(editor.cursor_y, editor.cursor_x)
         }
     }
-    fun insertRow(at: Int, buf: String){
+    private fun insertRow(at: Int, buf: String){
         editor.in_rows.add(at, buf)
         editor.num_rows++
     }

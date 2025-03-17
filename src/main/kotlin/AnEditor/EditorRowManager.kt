@@ -1,6 +1,6 @@
 package AnEditor
 
-class EditorRowManager(val editor: AnEditor) {
+class EditorRowManager(private val editor: AnEditor) {
     fun updateRow(row_idx: Int) {
         var render = ""
         var idx = 0
@@ -20,7 +20,7 @@ class EditorRowManager(val editor: AnEditor) {
         editor.renders[row_idx] = render
     }
     fun updateRows(){
-        for(i in 0..editor.in_rows.size-1){
+        for(i in 0..<editor.in_rows.size){
             updateRow(i)
         }
     }

@@ -11,7 +11,7 @@ class AnEditor {
     var renders: MutableList<String> = mutableListOf()
     var num_rows = 0
     val gui = EditorGUI(this)
-    val procceser = EditorKeyProcceser(this)
+    val processor = EditorKeyProcessor(this)
     val io = EditorIO(this)
     val writer = EditorWriter(this)
     val rowmng = EditorRowManager(this)
@@ -50,7 +50,7 @@ class AnEditor {
         while(status != 1){
             terminal.getWindowSize()
             gui.refreshScreen()
-            status = procceser.processKey()
+            status = processor.processKey()
         }
         die("AnEditor exit\r")
         terminal.disableRaw()

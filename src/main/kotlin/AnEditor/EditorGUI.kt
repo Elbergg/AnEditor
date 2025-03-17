@@ -4,7 +4,7 @@ enum class RENDER_CONSTANTS(val value: Int){
     TAB_STOP(8)
 }
 
-class EditorGUI(var editor: AnEditor) {
+class EditorGUI(private var editor: AnEditor) {
     private fun drawStatusBar(buf: String): String{
         var temp = buf
         temp = temp.plus("\u001B[7m")
@@ -12,7 +12,7 @@ class EditorGUI(var editor: AnEditor) {
         temp = temp.plus(editor.fileName)
         temp = temp.plus(" ")
         len++
-        var mod = "Modified: ${editor.notSaved}"
+        val mod = "Modified: ${editor.notSaved}"
         temp = temp.plus(mod)
         len+= mod.length
         temp = temp.plus(" ")
@@ -50,7 +50,7 @@ class EditorGUI(var editor: AnEditor) {
     }
     private fun drawRows(buf: String) : String{
         var temp = buf
-        for(ys in 0..editor.rows-1) {
+        for(ys in 0..<editor.rows) {
             var fileRow = ys + editor.rowOffset
             if (fileRow >= editor.num_rows) {
                 temp = temp.plus("${fileRow+1}")

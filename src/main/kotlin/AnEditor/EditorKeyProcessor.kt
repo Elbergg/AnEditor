@@ -7,7 +7,7 @@ enum class KEYS(val key: Int){
     HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004),
     BACKSPACE(127)
 }
-class EditorKeyProcceser(val editor: AnEditor) {
+class EditorKeyProcessor(private val editor: AnEditor) {
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
@@ -15,7 +15,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
         val key = System.`in`.read()
         if (key == 27)
         {
-            var seq  = ByteArray(3)
+            val seq  = ByteArray(3)
             System.`in`.read(seq)
             if(seq[0].toInt() !=0 && seq[1].toInt() != 1)
             {

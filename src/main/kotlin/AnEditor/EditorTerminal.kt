@@ -5,7 +5,7 @@ import com.sun.jna.Native
 import com.sun.jna.Structure
 import kotlin.system.exitProcess
 
-class EditorTerminal (val editor: AnEditor) {
+class EditorTerminal (private val editor: AnEditor) {
     fun enableRaw() {
         val termios = LibC.Termios()
         val rc = LibC.INSTANCE.tcgetattr(LibC.Constants.SYSTEM_OUT_FD, termios)
@@ -22,7 +22,7 @@ class EditorTerminal (val editor: AnEditor) {
         LibC.INSTANCE.tcsetattr(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TCSAFLUSH, termios)
     }
     fun getWindowSize(): Int{
-        var winsize = LibC.Winsize()
+        val winsize = LibC.Winsize()
         if(LibC.INSTANCE.ioctl(LibC.Constants.SYSTEM_OUT_FD, LibC.Constants.TIOCGWINSZ, winsize) == -1 || winsize.ws_col.toInt() == 0){
             System.out.write("\u001B[999C\u001B[999B".toByteArray())
             editor.rows -= 2
@@ -34,8 +34,8 @@ class EditorTerminal (val editor: AnEditor) {
             return 0
         }
     }
-    fun getCursorPos() : Int{
-        var buf = ByteArray(32)
+    private fun getCursorPos() : Int{
+        val buf = ByteArray(32)
         var i = 0
         System.out.write("\u001B[6n".toByteArray())
         while (i < buf.size - 1){
@@ -47,12 +47,11 @@ class EditorTerminal (val editor: AnEditor) {
         buf[i] = 0
         val str = buf.decodeToString().substring(2)
         val regex = """(\d+);(\d+)""".toRegex()
-        val matchResult = regex.find(str)
-        if (matchResult == null) return -1
+        val matchResult = regex.find(str) ?: return -1
         val (rowsStr, colsStr) = matchResult.destructured
         editor.rows = rowsStr.toIntOrNull() ?: return -1
         editor.cols = colsStr.toIntOrNull() ?: return -1
-        editor.procceser.readKey()
+        editor.processor.readKey()
         return 0
     }
     fun disableRaw() {

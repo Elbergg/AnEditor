@@ -3,7 +3,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
-class EditorIO (val editor: AnEditor) {
+class EditorIO (private val editor: AnEditor) {
     fun open(fileName: String){
         try {
             val lines = File(fileName).readLines()

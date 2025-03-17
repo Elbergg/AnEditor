@@ -1,6 +1,6 @@
 package AnEditor
 
-class EditorCursor (val editor: AnEditor) {
+class EditorCursor (private val editor: AnEditor) {
     fun moveCursor(key: Int){
         var row = if (editor.cursor_y >= editor.num_rows) null else editor.in_rows[editor.cursor_y]
         when (key){
@@ -30,7 +30,7 @@ class EditorCursor (val editor: AnEditor) {
             }
         }
         row = if(editor.cursor_y >= editor.num_rows) null else editor.in_rows[editor.cursor_y]
-        var rowlen = row?.length ?: 0
+        val rowlen = row?.length ?: 0
         if(editor.cursor_x > rowlen){
             editor.cursor_x = rowlen
         }
