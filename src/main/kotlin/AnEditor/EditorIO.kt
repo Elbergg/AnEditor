@@ -33,7 +33,7 @@ class EditorIO (private val editor: AnEditor) {
                 return 0
             }
         }
-        val buf = rowsToString()
+        val buf = editor.rowmng.rowsToString()
         val file = File(editor.fileName)
         try{file.writeText(buf)}catch(e:IOException){
             editor.gui.setStatusMessage(arrayOf("Error saving file"))

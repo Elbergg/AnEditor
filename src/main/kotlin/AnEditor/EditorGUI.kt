@@ -18,12 +18,12 @@ class EditorGUI(private var editor: AnEditor) {
         temp = temp.plus(" ")
         len++
         if(len < editor.cols) {
-            temp = temp.plus(editor.cursor_y.toString())
+            temp = temp.plus((editor.cursor_y+1).toString())
             temp = temp.plus(";")
             len += editor.cols.toString().length + 1
         }
         if(len < editor.cols) {
-            temp = temp.plus(editor.cursor_x.toString())
+            temp = temp.plus((editor.cursor_x+1).toString())
             len += editor.rows.toString().length
         }
         while(len < editor.cols){
@@ -95,23 +95,13 @@ class EditorGUI(private var editor: AnEditor) {
         }
     }
 
-    fun editorRowCxToRx(row_idx: Int,cx: Int ): Int
-    {
-        var rx = 0
-        for(j in 0..<cx){
-            if (editor.in_rows[row_idx][j] == '\t')
-                rx += (RENDER_CONSTANTS.TAB_STOP.value - 1) - (rx % RENDER_CONSTANTS.TAB_STOP.value)
-            rx++
-        }
-        return rx
-    }
 
     fun prompt(prompt: String): String{
         var buf = ""
         while(true){
             setStatusMessage(arrayOf(prompt, buf))
             refreshScreen()
-            val c = editor.procceser.readKey()
+            val c = editor.processor.readKey()
             if(c == KEYS.BACKSPACE.key){
                 if (buf.length >= 1){
                     buf = buf.substring(0, buf.length-1)
