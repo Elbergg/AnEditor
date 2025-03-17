@@ -50,7 +50,7 @@ class EditorKeyProcceser(val editor: AnEditor) {
     fun processKey() : Int {
         val c = readKey()
         when (c) {
-            '\r'.code -> {}
+            '\r'.code -> {editor.writer.insertNewLine()}
             ctrl(81)->{
                 if(editor.notSaved) {
                     editor.gui.setStatusMessage(arrayOf("The file has unsaved changes, are you sure you want to quit? [y]"))
@@ -91,7 +91,8 @@ class EditorKeyProcceser(val editor: AnEditor) {
                     editor.coursor_x = editor.in_rows[editor.coursor_y].length
             }
             ctrl('s'.code)->editor.io.save()
-            ctrl('h'.code), KEYS.BACKSPACE.key, KEYS.DEL_KEY.key->{editor.writer.delChar()}
+            KEYS.DEL_KEY.key->{editor.writer.delChar()}
+            ctrl('h'.code), KEYS.BACKSPACE.key -> {editor.writer.bckspcChar()}
             ctrl('l'.code)->{}
             ''.code->{}
             else -> editor.writer.insertChar(c.toChar())
