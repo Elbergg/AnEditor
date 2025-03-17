@@ -14,14 +14,14 @@ Despite running on the JVM, currently it only works on Linux, since it requires 
 
 `CTRL-S` to save the file
 
+`PgUp` and `PgDn` for quicker navigation up and down
+
+`Home` and `End` to go to the beggining or to the end of a line
+
 `y` to confirm
 
 ## Screenshots
 
+![](assets/2025-03-17-22-34-20-image.png)
 
-
-
-
-
-
-
+![](assets/2025-03-17-22-37-27-image.png)
