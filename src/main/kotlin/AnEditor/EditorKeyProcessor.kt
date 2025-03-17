@@ -7,7 +7,7 @@ enum class KEYS(val key: Int){
     HOME_KEY(2002), END_KEY(2003), DEL_KEY(2004),
     BACKSPACE(127)
 }
-class EditorKeyProcceser(val editor: AnEditor) {
+class EditorKeyProcessor(private val editor: AnEditor) {
     private fun ctrl(key: Int): Int{
         return key and 0x1f
     }
@@ -15,12 +15,12 @@ class EditorKeyProcceser(val editor: AnEditor) {
         val key = System.`in`.read()
         if (key == 27)
         {
-            var seq  = ByteArray(3)
+            val seq  = ByteArray(3)
             System.`in`.read(seq)
             if(seq[0].toInt() !=0 && seq[1].toInt() != 1)
             {
                 if(seq[0].toInt().toChar() =='['){
-                    if (seq[1].toInt().toChar() >= '0' && seq[1].toInt().toChar() <= '9')
+                    if (seq[1].toInt().toChar() in '0'..'9')
                     {
                         if(seq[2].toInt().toChar() == '~'){
                             when(seq[1].toInt().toChar()){
@@ -68,27 +68,27 @@ class EditorKeyProcceser(val editor: AnEditor) {
                     return 1
                 }
             }
-            KEYS.ARROW_UP.key ->moveCoursor(KEYS.ARROW_UP.key)
-            KEYS.ARROW_DOWN.key ->moveCoursor(KEYS.ARROW_DOWN.key)
-            KEYS.ARROW_LEFT.key ->moveCoursor(KEYS.ARROW_LEFT.key)
-            KEYS.ARROW_RIGHT.key ->moveCoursor(KEYS.ARROW_RIGHT.key)
+            KEYS.ARROW_UP.key ->editor.cursor.moveCursor(KEYS.ARROW_UP.key)
+            KEYS.ARROW_DOWN.key ->editor.cursor.moveCursor(KEYS.ARROW_DOWN.key)
+            KEYS.ARROW_LEFT.key ->editor.cursor.moveCursor(KEYS.ARROW_LEFT.key)
+            KEYS.ARROW_RIGHT.key ->editor.cursor.moveCursor(KEYS.ARROW_RIGHT.key)
             KEYS.PAGE_UP.key, KEYS.PAGE_DOWN.key ->{
                 if(c == KEYS.PAGE_UP.key){
-                    editor.coursor_y = editor.rowOffset
+                    editor.cursor_y = editor.rowOffset
                 }else if(c == KEYS.PAGE_DOWN.key){
-                    editor.coursor_y =  editor.rowOffset + editor.rows - 1
-                    if(editor.coursor_y > editor.num_rows)
-                        editor.coursor_y = editor.num_rows
+                    editor.cursor_y =  editor.rowOffset + editor.rows - 1
+                    if(editor.cursor_y > editor.num_rows)
+                        editor.cursor_y = editor.num_rows
                 }
                 var max = editor.rows
                 while(max-- > 0){
-                    moveCoursor(if (c == KEYS.PAGE_UP.key) KEYS.ARROW_UP.key else KEYS.ARROW_DOWN.key)
+                    editor.cursor.moveCursor(if (c == KEYS.PAGE_UP.key) KEYS.ARROW_UP.key else KEYS.ARROW_DOWN.key)
                 }
             }
-            KEYS.HOME_KEY.key->editor.coursor_x = 0
+            KEYS.HOME_KEY.key->editor.cursor_x = 0
             KEYS.END_KEY.key->{
-                if(editor.coursor_y < editor.num_rows)
-                    editor.coursor_x = editor.in_rows[editor.coursor_y].length
+                if(editor.cursor_y < editor.num_rows)
+                    editor.cursor_x = editor.in_rows[editor.cursor_y].length
             }
             ctrl('s'.code)->editor.io.save()
             KEYS.DEL_KEY.key->{editor.writer.delChar()}
@@ -99,38 +99,5 @@ class EditorKeyProcceser(val editor: AnEditor) {
         }
         return 0
     }
-    fun moveCoursor(key: Int){
-        var row = if (editor.coursor_y >= editor.num_rows) null else editor.in_rows[editor.coursor_y]
-        when (key){
-            KEYS.ARROW_DOWN.key->{
-                if(editor.coursor_y<editor.num_rows)
-                    editor.coursor_y++
-            }
-            KEYS.ARROW_UP.key->{
-                if(editor.coursor_y!=0)
-                    editor.coursor_y--
-            }
-            KEYS.ARROW_LEFT.key->{
-                if(editor.coursor_x!= 0) {
-                    editor.coursor_x--
-                }else if(editor.coursor_y > 0){
-                    editor.coursor_y--
-                    editor.coursor_x=editor.in_rows[editor.coursor_y].length
-                }
-            }
-            KEYS.ARROW_RIGHT.key-> {
-                    if(row != null && editor.coursor_x < row.length) {
-                        editor.coursor_x++
-                    }else if (row != null && editor.coursor_x == row.length){
-                        editor.coursor_y++
-                        editor.coursor_x = 0
-                    }
-            }
-        }
-        row = if(editor.coursor_y >= editor.num_rows) null else editor.in_rows[editor.coursor_y]
-        var rowlen = row?.length ?: 0
-        if(editor.coursor_x > rowlen){
-            editor.coursor_x = rowlen
-        }
-    }
+
 }
