@@ -11,6 +11,7 @@ class EditorWriter(private val editor: AnEditor) {
     fun insertChar(c: Char){
         if(editor.cursor_y == editor.num_rows){
             insertRow(editor.num_rows, "")
+            editor.renders.add(editor.cursor_y, "")
             editor.rows++
         }
         rowInsertChar(editor.cursor_y, editor.cursor_x, c)
