@@ -96,27 +96,33 @@ class EditorGUI(private var editor: AnEditor) {
     }
 
 
-    fun prompt(prompt: String): String{
+    fun prompt(prompt: String, callback: ((String, Int) -> Unit)? = null): String{
         var buf = ""
         while(true){
             setStatusMessage(arrayOf(prompt, buf))
             refreshScreen()
             val c = editor.processor.readKey()
-            if(c == KEYS.BACKSPACE.key){
+            if(c.toChar() == ''){
+                buf = ""
+                return buf
+            }
+            else if(c == KEYS.BACKSPACE.key){
                 if (buf.length >= 1){
                     buf = buf.substring(0, buf.length-1)
                 }
             }
-            else if(c.toChar() == ''){
-                buf = ""
-                return buf
-            }
             else if(c.toChar() == '\r'){
                 setStatusMessage(arrayOf(""))
+                if(callback != null){
+                    callback(buf, c)
+                }
                 return buf
             }
             else if(!c.toChar().isISOControl() && c < 128){
                 buf += c.toChar()
+            }
+            if(callback != null){
+                callback(buf, c)
             }
         }
     }

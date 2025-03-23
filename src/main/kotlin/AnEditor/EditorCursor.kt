@@ -45,4 +45,19 @@ class EditorCursor (private val editor: AnEditor) {
         }
         return rx
     }
+
+    fun RxToCx(row_idx: Int, rx: Int): Int
+    {
+        var curr_rx = 0
+        var cx = 0
+       while(cx < editor.in_rows[row_idx].length) {
+            if(editor.in_rows[row_idx][cx] == '\t')
+                curr_rx += (RENDER_CONSTANTS.TAB_STOP.value - 1) - (curr_rx % RENDER_CONSTANTS.TAB_STOP.value)
+            curr_rx++
+            if (curr_rx > rx)
+                return cx
+            cx++
+        }
+        return cx
+    }
 }

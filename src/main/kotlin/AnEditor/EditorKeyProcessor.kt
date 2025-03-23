@@ -94,6 +94,9 @@ class EditorKeyProcessor(private val editor: AnEditor) {
             KEYS.DEL_KEY.key->{editor.writer.delChar()}
             ctrl('h'.code), KEYS.BACKSPACE.key -> {editor.writer.bckspcChar()}
             ctrl('l'.code)->{}
+            ctrl('f'.code)->{
+                editor.finder.find()
+            }
             ''.code->{}
             else -> editor.writer.insertChar(c.toChar())
         }

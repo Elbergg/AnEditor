@@ -17,6 +17,7 @@ class AnEditor {
     val rowmng = EditorRowManager(this)
     val terminal = EditorTerminal(this)
     val cursor = EditorCursor(this)
+    val finder = EditorFinder(this)
     var rowOffset = 0
     var lineNumOffset = 0
     var colOffset = 0
@@ -38,7 +39,7 @@ class AnEditor {
         terminal.enableRaw()
         terminal.getWindowSize()
         var status = 0
-        gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit | Ctrl-S = save"))
+        gui.setStatusMessage(arrayOf("HELP: Ctrl-Q = quit | Ctrl-S = save | CTRL-F = find"))
         gui.refreshScreen()
         if(args.isNotEmpty()) {
             io.open(args[0])
